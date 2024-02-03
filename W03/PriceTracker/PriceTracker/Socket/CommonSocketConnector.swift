@@ -24,6 +24,8 @@ class CommonSocketConnector: CommonSocketProtocol {
   // MARK: - properties
   
   var message: String?
+  var totalSum: Int = 0
+  
   weak var delegate: CommonSocketConnectorDelegate?
   
   
@@ -48,6 +50,7 @@ class CommonSocketConnector: CommonSocketProtocol {
           switch message {
             case .string(let text):
               DispatchQueue.global().async {
+                self?.totalSum += Int(text) ?? 0
                 self?.delegate?.didReceiveMessage(text)
               }
             case .data:
@@ -66,6 +69,10 @@ class CommonSocketConnector: CommonSocketProtocol {
 
   func disconnect() {
     self.socketTask?.cancel()
+  }
+  
+  func getValue() -> Int {
+    return self.totalSum
   }
   
 }

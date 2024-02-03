@@ -76,17 +76,15 @@ class CommonCountViewController: UIViewController, CommonSocketConnectorDelegate
   
   func didReceiveMessage(_ message: String) {
     guard !message.contains("Sum") else {
-      print("message from Server: \(message), client: \(self.totalSum)")
-      self.totalSum = .zero
+      print("message from Server: \(message), client: \(self.socketConnector.getValue())")
+      DispatchQueue.main.async {
+        self.label.text = "0"
+      }
       return
     }
     
     DispatchQueue.main.async {
       self.label.text = message
-    }
-    
-    if let message = Int(message) {
-      self.totalSum += message
     }
   }
 }
