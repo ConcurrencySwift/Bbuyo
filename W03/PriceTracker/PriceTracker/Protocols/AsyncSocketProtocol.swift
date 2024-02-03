@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol AsyncSocketProtocol: SocketDeleagteProtocol {  
+protocol AsyncSocketProtocol {
   func connect(url: URL) async
   func receive() async
   func disconnect() async

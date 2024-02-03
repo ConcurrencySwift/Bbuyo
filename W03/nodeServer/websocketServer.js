@@ -16,7 +16,7 @@ function sendRandomNumbers(ws) {
       if (numbersSent < count) {
         setTimeout(sendNumber, duration / count); // 3초 동안 균일하게 분배
       } else {
-        setTimeout(() => ws.send(`Sum: ${sum}, Send Count: ${count}`), 1000); // 총합 전송 후 1초 쉼
+        setTimeout(() => ws.send(`Sum: ${sum}`), 1000); // 총합 전송 후 1초 쉼
         setTimeout(resetAndStart, 2000); // 1초 후 다시 시작
       }
     }

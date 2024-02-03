@@ -2,14 +2,14 @@
 //  ViewController.swift
 //  PriceTracker
 //
-//  Created by 송하민 on 2/1/24.
+//  Created by 송하민 on 2/3/24.
 //
 
 import UIKit
 import SnapKit
 import Then
 
-class ViewController: UIViewController, ActorSocketConnectorDelegate, CommonSocketConnectorDelegate {
+class CommonCountViewController: UIViewController, CommonSocketConnectorDelegate {
 
   
   // MARK: - component
@@ -26,14 +26,14 @@ class ViewController: UIViewController, ActorSocketConnectorDelegate, CommonSock
   
   // MARK: - private properties
   
-  private let socketConnector: any AsyncSocketProtocol
+  private let socketConnector: CommonSocketConnector
   
   private var totalSum: Int = 0
   
   
   // MARK: - life cycle
   
-  init(socket: any AsyncSocketProtocol) {
+  init(socket: CommonSocketConnector) {
     self.socketConnector = socket
     super.init(nibName: nil, bundle: nil)
   }
@@ -66,15 +66,10 @@ class ViewController: UIViewController, ActorSocketConnectorDelegate, CommonSock
   }
   
   private func connectSocket() {
-    Task {
-      await self.socketConnector.connect(url: URL(string: "ws://localhost:3001")!)
-      if let actorSocketConnector = self.socketConnector as? ActorSocketConnector {
-        await actorSocketConnector.setDelegate(self)
-      } else if let commonSocketConnector = self.socketConnector as? CommonSocketConnector {
-        await commonSocketConnector.setDelegate(self)
-      }
-      await self.socketConnector.receive()
-    }
+    self.socketConnector.connect(url: URL(string: "ws://localhost:3001")!)
+    self.socketConnector.delegate = self
+    self.socketConnector.receive()
+    
   }
 
   // MARK: - method
@@ -85,6 +80,7 @@ class ViewController: UIViewController, ActorSocketConnectorDelegate, CommonSock
       self.totalSum = .zero
       return
     }
+    
     DispatchQueue.main.async {
       self.label.text = message
     }
@@ -93,7 +89,5 @@ class ViewController: UIViewController, ActorSocketConnectorDelegate, CommonSock
       self.totalSum += message
     }
   }
-  
-
 }
 

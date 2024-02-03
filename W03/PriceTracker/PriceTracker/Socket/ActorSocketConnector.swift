@@ -1,19 +1,17 @@
 //
-//  CommonSocketConnector.swift
+//  SocketConnector.swift
 //  PriceTracker
 //
-//  Created by 송하민 on 2/3/24.
+//  Created by 송하민 on 2/1/24.
 //
 
 import Foundation
 
-
-protocol CommonSocketConnectorDelegate: AnyObject {
+protocol ActorSocketConnectorDelegate: AnyObject {
   func didReceiveMessage(_ message: String)
 }
 
-class CommonSocketConnector: AsyncSocketProtocol {
-  
+actor ActorSocketConnector: AsyncSocketProtocol {
   
   // MARK: - private properties
   
@@ -23,16 +21,18 @@ class CommonSocketConnector: AsyncSocketProtocol {
   
   // MARK: - properties
 
-  weak var delegate: CommonSocketConnectorDelegate?
+  weak var delegate: ActorSocketConnectorDelegate?
   
   var message: String? {
     didSet {
-      notifyDelegate(message: message ?? "0")
+      guard let message else { return }
+      notifyDelegate(message: message)
     }
   }
   
   
   // MARK: - life cycle
+
   
   // MARK: - private method
   
@@ -43,7 +43,7 @@ class CommonSocketConnector: AsyncSocketProtocol {
     self.socketTask = self.urlSession.webSocketTask(with: url)
     self.socketTask?.resume()
     
-    print("common socket connected")
+    print("actor socket connected")
   }
   
   func receive() async {
@@ -51,9 +51,7 @@ class CommonSocketConnector: AsyncSocketProtocol {
       if let message = try? await socketTask?.receive() {
         switch message {
           case .string(let text):
-            DispatchQueue.global().async {
-              self.message = text
-            }
+            self.message = text
           case .data:
             continue
           @unknown default:
@@ -70,13 +68,12 @@ class CommonSocketConnector: AsyncSocketProtocol {
   }
   
   func notifyDelegate(message: String) {
-    Task {
-      self.delegate?.didReceiveMessage(message)
+    Task { @MainActor in
+      await self.delegate?.didReceiveMessage(message)
     }
   }
-  
-  func setDelegate(_ newDelegate: CommonSocketConnectorDelegate?) async  {
+
+  func setDelegate(_ newDelegate: ActorSocketConnectorDelegate) {
     self.delegate = newDelegate
   }
-
 }
